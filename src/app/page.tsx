@@ -178,7 +178,7 @@ export default function Home() {
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
               Drop a <code className="rounded bg-slate-100 px-1.5 py-0.5 text-sm text-slate-900">.html</code>{" "}
-              file, let the app store its raw markup locally, then open it again
+              file, let the app store its raw markup in object storage, then open it again
               through a six-character route.
             </p>
 
@@ -197,7 +197,7 @@ export default function Home() {
                   Storage
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-700">
-                  Saved to <span className="font-mono text-slate-950">public/uploads</span>.
+                  Stored in <span className="font-mono text-slate-950">Cloudflare R2</span>.
                 </p>
               </div>
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4">

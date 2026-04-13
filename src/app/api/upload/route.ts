@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { PutObjectCommand, S3ServiceException } from "@aws-sdk/client-s3";
+
+import { getR2BucketName, getR2Client } from "@/lib/r2";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ID_CHARACTERS =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-const UPLOAD_DIRECTORY = path.join(process.cwd(), "public", "uploads");
 
 export const runtime = "nodejs";
 
@@ -17,12 +17,10 @@ function generateId() {
     .slice(0, 6);
 }
 
-function hasErrorCode(error: unknown): error is { code: string } {
+function isConditionalWriteConflict(error: unknown) {
   return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    typeof error.code === "string"
+    error instanceof S3ServiceException &&
+    (error.name === "PreconditionFailed" || error.$metadata.httpStatusCode === 412)
   );
 }
 
@@ -52,21 +50,25 @@ export async function POST(request: Request) {
     }
 
     const htmlContent = await file.text();
-    await mkdir(UPLOAD_DIRECTORY, { recursive: true });
 
     for (let attempt = 0; attempt < 10; attempt += 1) {
       const id = generateId();
-      const filePath = path.join(UPLOAD_DIRECTORY, `${id}.html`);
+      const objectKey = `${id}.html`;
 
       try {
-        await writeFile(filePath, htmlContent, {
-          encoding: "utf8",
-          flag: "wx",
-        });
+        await getR2Client().send(
+          new PutObjectCommand({
+            Bucket: getR2BucketName(),
+            Key: objectKey,
+            Body: htmlContent,
+            ContentType: "text/html; charset=utf-8",
+            IfNoneMatch: "*",
+          }),
+        );
 
         return Response.json({ id, url: `/${id}` });
       } catch (error) {
-        if (hasErrorCode(error) && error.code === "EEXIST") {
+        if (isConditionalWriteConflict(error)) {
           continue;
         }
 

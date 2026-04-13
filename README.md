@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Materi HTML Hoster
 
-## Getting Started
+Upload a `.html` file, store it in Cloudflare R2, and open it again through a six-character URL.
 
-First, run the development server:
+## Environment Variables
+
+Copy `.env.example` to `.env.local` for local development and fill in these values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cloudflare R2 Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Create a Cloudflare account.
+2. Create an R2 bucket for uploads.
+3. Create an R2 API token with object read and write access.
+4. Add the bucket name, account ID, access key ID, and secret access key to `.env.local`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app stores uploaded HTML files in R2 as `{id}.html` and reads them back through the server route at `/:id`.
 
-## Learn More
+## Local Development
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open `http://localhost:3000` in your browser.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Import the project into Vercel.
+2. Add the same four R2 environment variables in the Vercel project settings.
+3. Deploy.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The upload and read routes run on Vercel, while file contents live in Cloudflare R2 instead of the local filesystem.
